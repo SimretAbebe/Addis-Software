@@ -12,7 +12,7 @@ const App = () => {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>🎵 Addis Music App</h1>
+      <h1>Addis Music App</h1>
       
       {loading && <p>Loading songs...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
