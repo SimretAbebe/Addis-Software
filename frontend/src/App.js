@@ -19,6 +19,12 @@ const App = () => {
     setFormData({ title: '', artist: '', album: '', year: '' }); // Clear form
   };
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this song?')) {
+      dispatch(deleteSongRequest(id));
+    }
+  };
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
       <h1>Addis Music App</h1>
@@ -56,10 +62,18 @@ const App = () => {
       {loading && <p>Loading songs...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       
-      <ul>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
         {list.map((song) => (
-          <li key={song.id} style={{ marginBottom: '10px' }}>
-            <strong>{song.title}</strong> - {song.artist} ({song.year})
+          <li key={song.id} style={{ marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong>{song.title}</strong> - {song.artist} ({song.year})
+            </div>
+            <button 
+              onClick={() => handleDelete(song.id)}
+              style={{ padding: '5px 10px', backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>
