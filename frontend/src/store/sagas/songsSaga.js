@@ -5,7 +5,8 @@ import {
   fetchSongsFailure, 
   fetchSongsRequest,
   addSongRequest,
-  deleteSongRequest 
+  deleteSongRequest,
+  updateSongRequest 
 } from '../slices/songsSlice';
 
 const API_URL = process.env.API_BASE_URL + '/songs';
@@ -39,11 +40,22 @@ function* deleteSongSaga(action) {
   }
 }
 
+function* updateSongSaga(action) {
+  try {
+    const { id, data } = action.payload;
+    yield call(axios.put, `${API_URL}/${id}`, data);
+    yield put(fetchSongsRequest()); // Refresh the list
+  } catch (e) {
+    yield put(fetchSongsFailure(e.message));
+  }
+}
+
 // Watcher Saga
 function* songsSaga() {
   yield takeEvery(fetchSongsRequest.type, fetchSongsSaga);
   yield takeEvery(addSongRequest.type, addSongSaga);
   yield takeEvery(deleteSongRequest.type, deleteSongSaga);
+  yield takeEvery(updateSongRequest.type, updateSongSaga);
 }
 
 export default songsSaga;

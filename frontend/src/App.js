@@ -75,6 +75,7 @@ const App = () => {
   const dispatch = useDispatch();
   const { list, loading, error } = useSelector((state) => state.songs);
   const [formData, setFormData] = useState({ title: '', artist: '', album: '', year: '' });
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchSongsRequest());
@@ -82,8 +83,23 @@ const App = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(addSongRequest(formData));
+    if (editingId) {
+      dispatch(updateSongRequest({ id: editingId, data: formData }));
+      setEditingId(null);
+    } else {
+      dispatch(addSongRequest(formData));
+    }
     setFormData({ title: '', artist: '', album: '', year: '' });
+  };
+
+  const handleEdit = (song) => {
+    setFormData({
+      title: song.title,
+      artist: song.artist,
+      album: song.album,
+      year: song.year
+    });
+    setEditingId(song.id);
   };
 
   const handleDelete = (id) => {
@@ -99,12 +115,24 @@ const App = () => {
         <Header>Addis Music App</Header>
 
         <Form onSubmit={handleSubmit}>
-          <h3>Add New Song</h3>
+          <h3>{editingId ? 'Edit Song' : 'Add New Song'}</h3>
           <Input placeholder="Title" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
           <Input placeholder="Artist" value={formData.artist} onChange={e => setFormData({...formData, artist: e.target.value})} required />
           <Input placeholder="Album" value={formData.album} onChange={e => setFormData({...formData, album: e.target.value})} required />
           <Input placeholder="Year" type="number" value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} required />
-          <Button type="submit">Add Song</Button>
+          <Button type="submit">{editingId ? 'Update Song' : 'Add Song'}</Button>
+          {editingId && (
+            <Button 
+              type="button" 
+              style={{ background: '#444', marginTop: '5px' }} 
+              onClick={() => {
+                setEditingId(null);
+                setFormData({ title: '', artist: '', album: '', year: '' });
+              }}
+            >
+              Cancel Edit
+            </Button>
+          )}
         </Form>
         
         {loading && <p>Loading...</p>}
@@ -117,7 +145,10 @@ const App = () => {
                 <strong>{song.title}</strong><br/>
                 <small style={{ color: theme.colors.textSecondary }}>{song.artist} • {song.album} ({song.year})</small>
               </div>
-              <Button danger onClick={() => handleDelete(song.id)}>Delete</Button>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <Button onClick={() => handleEdit(song)}>Edit</Button>
+                <Button danger onClick={() => handleDelete(song.id)}>Delete</Button>
+              </div>
             </SongCard>
           ))}
         </ul>
