@@ -71,15 +71,33 @@ const SongCard = styled.li`
   &:hover { background-color: #282828; }
 `;
 
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ${theme.spacing.medium};
+  margin-top: ${theme.spacing.large};
+`;
+
+const PageInfo = styled.span`
+  color: ${theme.colors.textSecondary};
+  font-weight: bold;
+`;
+
 const App = () => {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.songs);
+  const { list, loading, error, page, totalPages } = useSelector((state) => state.songs);
   const [formData, setFormData] = useState({ title: '', artist: '', album: '', year: '' });
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchSongsRequest());
+    // Initial fetch for page 1
+    dispatch(fetchSongsRequest({ page: 1 }));
   }, [dispatch]);
+
+  const handlePageChange = (newPage) => {
+    dispatch(fetchSongsRequest({ page: newPage }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -100,6 +118,7 @@ const App = () => {
       year: song.year
     });
     setEditingId(song.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = (id) => {
@@ -135,8 +154,8 @@ const App = () => {
           )}
         </Form>
         
-        {loading && <p>Loading...</p>}
-        {error && <p style={{ color: theme.colors.error }}>{error}</p>}
+        {loading && <p style={{ textAlign: 'center' }}>Loading...</p>}
+        {error && <p style={{ color: theme.colors.error, textAlign: 'center' }}>{error}</p>}
         
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {list.map((song) => (
@@ -152,6 +171,26 @@ const App = () => {
             </SongCard>
           ))}
         </ul>
+
+        {list.length > 0 && (
+          <Pagination>
+            <Button 
+              disabled={page === 1} 
+              onClick={() => handlePageChange(page - 1)}
+              style={{ width: '100px' }}
+            >
+              Previous
+            </Button>
+            <PageInfo>Page {page} of {totalPages}</PageInfo>
+            <Button 
+              disabled={page === totalPages} 
+              onClick={() => handlePageChange(page + 1)}
+              style={{ width: '100px' }}
+            >
+              Next
+            </Button>
+          </Pagination>
+        )}
       </Container>
     </ThemeProvider>
   );

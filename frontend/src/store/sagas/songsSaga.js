@@ -14,7 +14,7 @@ const API_URL = process.env.API_BASE_URL + '/songs';
 // Worker Sagas
 function* fetchSongsSaga(action) {
   try {
-    const { page = 1, limit = 10 } = action.payload || {};
+    const { page = 1, limit = 5 } = action.payload || {};
     const response = yield call(axios.get, `${API_URL}?page=${page}&limit=${limit}`);
     yield put(fetchSongsSuccess(response.data));
   } catch (e) {
