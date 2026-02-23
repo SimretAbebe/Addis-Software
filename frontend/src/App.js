@@ -84,19 +84,34 @@ const PageInfo = styled.span`
   font-weight: bold;
 `;
 
+const SearchBar = styled.input`
+  width: 100%;
+  padding: 12px;
+  margin-bottom: ${theme.spacing.medium};
+  background-color: ${theme.colors.surface};
+  border: 1px solid #333;
+  color: white;
+  border-radius: ${theme.borderRadius};
+  box-sizing: border-box;
+`;
+
 const App = () => {
   const dispatch = useDispatch();
   const { list, loading, error, page, totalPages } = useSelector((state) => state.songs);
   const [formData, setFormData] = useState({ title: '', artist: '', album: '', year: '' });
   const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Initial fetch for page 1
-    dispatch(fetchSongsRequest({ page: 1 }));
-  }, [dispatch]);
+    // Initial fetch for page 1 with search
+    const timer = setTimeout(() => {
+      dispatch(fetchSongsRequest({ page: 1, search: searchTerm }));
+    }, 300); // 300ms debounce
+    return () => clearTimeout(timer);
+  }, [dispatch, searchTerm]);
 
   const handlePageChange = (newPage) => {
-    dispatch(fetchSongsRequest({ page: newPage }));
+    dispatch(fetchSongsRequest({ page: newPage, search: searchTerm }));
   };
 
   const handleSubmit = (e) => {
@@ -153,6 +168,12 @@ const App = () => {
             </Button>
           )}
         </Form>
+
+        <SearchBar 
+          placeholder="Search by title or artist..." 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+        />
         
         {loading && <p style={{ textAlign: 'center' }}>Loading...</p>}
         {error && <p style={{ color: theme.colors.error, textAlign: 'center' }}>{error}</p>}

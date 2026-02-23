@@ -26,14 +26,23 @@ const paginate = (array, page_size, page_number) => {
 app.get('/api/songs', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search ? req.query.search.toLowerCase() : '';
   
-  const paginatedSongs = paginate(songs, limit, page);
+  let filteredSongs = songs;
+  if (search) {
+    filteredSongs = songs.filter(s => 
+      s.title.toLowerCase().includes(search) || 
+      s.artist.toLowerCase().includes(search)
+    );
+  }
+  
+  const paginatedSongs = paginate(filteredSongs, limit, page);
   
   res.json({
     data: paginatedSongs,
-    total: songs.length,
+    total: filteredSongs.length,
     page,
-    totalPages: Math.ceil(songs.length / limit)
+    totalPages: Math.ceil(filteredSongs.length / limit)
   });
 });
 
