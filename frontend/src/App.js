@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchSongsRequest, addSongRequest, deleteSongRequest } from './store/slices/songsSlice';
+import { fetchSongsRequest, addSongRequest, deleteSongRequest, updateSongRequest, setCurrentSong, togglePlay, playNext, playPrevious } from './store/slices/songsSlice';
 import { ThemeProvider, Global, css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { theme } from './styles/theme';
@@ -23,6 +23,7 @@ const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: ${theme.spacing.large};
+  padding-bottom: 120px;
 `;
 
 const Header = styled.h1`
@@ -84,6 +85,59 @@ const PageInfo = styled.span`
   font-weight: bold;
 `;
 
+const PlayerBar = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background-color: #181818;
+  border-top: 1px solid #282828;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 ${theme.spacing.large};
+  z-index: 1000;
+`;
+
+const SongInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+`;
+
+const PlaybackControls = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 40%;
+`;
+
+const ControlButtons = styled.div`
+  display: flex;
+  gap: 20px;
+  align-items: center;
+`;
+
+const Progress = styled.div`
+  width: 100%;
+  height: 4px;
+  background: #4f4f4f;
+  border-radius: 2px;
+  position: relative;
+`;
+
+const ProgressBar = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: ${theme.colors.primary};
+  width: 30%; /* Simulated progress */
+  border-radius: 2px;
+`;
+
 const SearchBar = styled.input`
   width: 100%;
   padding: 12px;
@@ -97,10 +151,18 @@ const SearchBar = styled.input`
 
 const App = () => {
   const dispatch = useDispatch();
-  const { list, loading, error, page, totalPages } = useSelector((state) => state.songs);
+  const { list, loading, error, page, totalPages, currentSong, isPlaying } = useSelector((state) => state.songs);
   const [formData, setFormData] = useState({ title: '', artist: '', album: '', year: '' });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handlePlaySong = (song) => {
+    if (currentSong && currentSong.id === song.id) {
+      dispatch(togglePlay());
+    } else {
+      dispatch(setCurrentSong(song));
+    }
+  };
 
   useEffect(() => {
     // Initial fetch for page 1 with search
@@ -186,6 +248,9 @@ const App = () => {
                 <small style={{ color: theme.colors.textSecondary }}>{song.artist} • {song.album} ({song.year})</small>
               </div>
               <div style={{ display: 'flex', gap: '5px' }}>
+                <Button onClick={() => handlePlaySong(song)} style={{ background: currentSong?.id === song.id && isPlaying ? '#158a3e' : undefined }}>
+                  {currentSong?.id === song.id && isPlaying ? '⏸ Pause' : '▶ Play'}
+                </Button>
                 <Button onClick={() => handleEdit(song)}>Edit</Button>
                 <Button danger onClick={() => handleDelete(song.id)}>Delete</Button>
               </div>
@@ -213,6 +278,30 @@ const App = () => {
           </Pagination>
         )}
       </Container>
+
+      {currentSong && (
+        <PlayerBar>
+          <SongInfo>
+            <strong style={{ color: theme.colors.primary }}>{currentSong.title}</strong>
+            <small style={{ color: theme.colors.textSecondary }}>{currentSong.artist}</small>
+          </SongInfo>
+          <PlaybackControls>
+            <ControlButtons>
+              <Button onClick={() => dispatch(playPrevious())} style={{ padding: '8px 15px' }}>⏮</Button>
+              <Button onClick={() => dispatch(togglePlay())} style={{ padding: '8px 20px', fontSize: '18px' }}>
+                {isPlaying ? '⏸' : '▶'}
+              </Button>
+              <Button onClick={() => dispatch(playNext())} style={{ padding: '8px 15px' }}>⏭</Button>
+            </ControlButtons>
+            <Progress>
+              <ProgressBar />
+            </Progress>
+          </PlaybackControls>
+          <div style={{ width: '30%', textAlign: 'right', color: theme.colors.textSecondary }}>
+            {currentSong.album} ({currentSong.year})
+          </div>
+        </PlayerBar>
+      )}
     </ThemeProvider>
   );
 };
