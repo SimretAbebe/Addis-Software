@@ -249,7 +249,7 @@ const App = () => {
               </div>
               <div style={{ display: 'flex', gap: '5px' }}>
                 <Button onClick={() => handlePlaySong(song)} style={{ background: currentSong?.id === song.id && isPlaying ? '#158a3e' : undefined }}>
-                  {currentSong?.id === song.id && isPlaying ? '⏸ Pause' : '▶ Play'}
+                  {currentSong?.id === song.id && isPlaying ? 'Pause' : 'Play'}
                 </Button>
                 <Button onClick={() => handleEdit(song)}>Edit</Button>
                 <Button danger onClick={() => handleDelete(song.id)}>Delete</Button>
@@ -287,11 +287,11 @@ const App = () => {
           </SongInfo>
           <PlaybackControls>
             <ControlButtons>
-              <Button onClick={() => dispatch(playPrevious())} style={{ padding: '8px 15px' }}>⏮</Button>
+              <Button onClick={() => dispatch(playPrevious())} style={{ padding: '8px 15px' }}>Prev</Button>
               <Button onClick={() => dispatch(togglePlay())} style={{ padding: '8px 20px', fontSize: '18px' }}>
-                {isPlaying ? '⏸' : '▶'}
+                {isPlaying ? 'Pause' : 'Play'}
               </Button>
-              <Button onClick={() => dispatch(playNext())} style={{ padding: '8px 15px' }}>⏭</Button>
+              <Button onClick={() => dispatch(playNext())} style={{ padding: '8px 15px' }}>Next</Button>
             </ControlButtons>
             <Progress>
               <ProgressBar />
